@@ -1,0 +1,53 @@
+.save {
+  margin-right: 8px;
+}
+
+.ant-advanced-search-form {
+  padding: 24px;
+  background: #fbfbfb;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+}
+
+.search-result-list {
+  margin-top: 16px;
+  border-radius: 6px;
+  background-color: #fafafa;
+  min-height: 200px;
+  text-align: center;
+}
+
+[nz-form-label] {
+  overflow: visible;
+}
+
+.collapse {
+  margin-left: 8px;
+  font-size: 12px;
+}
+
+.search-area {
+  text-align: right;
+}
+
+.search-box {
+  padding: 8px;
+}
+
+.search-box input {
+  margin-bottom: 8px;
+  display: block;
+}
+
+.search-box button {
+  width: 90px;
+}
+
+.search-button {
+  margin-right: 8px;
+}
+
+span.anticon.anticon-search {
+  color: blue;
+  font-size: 16px;
+}

@@ -1,0 +1,362 @@
+<nz-tabset>
+  <nz-tab nzTitle="Cài đặt loại dự án" (nzClick)="loadDataTypeProject()">
+    <form
+      nz-form
+      [formGroup]="validateFormTypeProject"
+      class="ant-advanced-search-form"
+      (ngSubmit)="submitFormTypeProject()"
+    >
+      <div nz-row [nzGutter]="24">
+        <div
+          nz-col
+          [nzSpan]="11"
+          *ngFor="let control of controlArrayTypeProject"
+          [hidden]="!control.show"
+        >
+          <nz-form-item>
+            <nz-form-label [nzFor]="control.name">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control nzDisableAutoTips nzErrorTip="Input is required!">
+              <input
+                nz-input
+                placeholder="{{ control.placeholder }}"
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+              />
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <nz-form-item>
+          <nz-form-control [nzSpan]="8" [nzOffset]="4">
+            <div nz-col [nzSpan]="2" class="search-area">
+              <button nz-button [nzType]="'primary'">Thêm</button>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </form>
+    <div class="search-result-list">
+      <nz-table
+        #editTypeProjectRowTable
+        nzBordered
+        [nzData]="listOfDataTypeProject"
+        [nzSize]="'middle'"
+        [nzPageSize]="18"
+        nzTableLayout="fixed"
+        [nzScroll]="{ y: '450px' }"
+        [nzLoading]="loadingData"
+      >
+        <thead>
+          <tr>
+            <th [nzAlign]="'center'" nzWidth="10%">Trạng thái</th>
+            <th [nzAlign]="'center'" nzWidth="40%" nzCustomFilter>
+              Loại dự án
+              <nz-filter-trigger
+                [(nzVisible)]="visibleSearchTypeProject"
+                [nzActive]="searchTypeProjectValue.length > 0"
+                [nzDropdownMenu]="menuSearchTypeProject"
+              >
+                <span nz-icon nzType="search"></span>
+              </nz-filter-trigger>
+            </th>
+            <th [nzAlign]="'center'" nzWidth="40%">Ghi chú</th>
+            <th [nzAlign]="'center'">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of editTypeProjectRowTable.data">
+            <ng-container
+              *ngIf="
+                !editCacheTypeProject[data.id].edit;
+                else editTypeProjectTemplate
+              "
+            >
+              <td [nzAlign]="'center'">
+                {{ data.active === 1 ? "Yes" : "No" }}
+              </td>
+              <td [nzAlign]="'center'">{{ data.type }}</td>
+              <td [nzAlign]="'center'">{{ data.note }}</td>
+              <td [nzAlign]="'center'">
+                <a (click)="startEditTypeProject(data.id)">Chỉnh sửa</a>
+              </td>
+            </ng-container>
+            <ng-template #editTypeProjectTemplate>
+              <td [nzAlign]="'center'">
+                <button nz-button nz-dropdown [nzDropdownMenu]="menuActive">
+                  {{
+                    editCacheTypeProject[data.id].data.active === 1
+                      ? "Yes"
+                      : "No"
+                  }}
+                  <span nz-icon nzType="down"></span>
+                </button>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  nz-input
+                  [(ngModel)]="editCacheTypeProject[data.id].data.type"
+                />
+              </td>
+              <td>
+                <input
+                  type="text"
+                  nz-input
+                  [(ngModel)]="editCacheTypeProject[data.id].data.note"
+                />
+              </td>
+              <td [nzAlign]="'center'">
+                <a (click)="saveEditTypeProject(data.id)" class="save">Lưu</a>
+                <a
+                  nz-popconfirm
+                  nzPopconfirmTitle="Bạn có chắc chắn muốn huỷ không?"
+                  (nzOnConfirm)="cancelEditTypeProject(data.id)"
+                  >Huỷ</a
+                >
+              </td>
+              <nz-dropdown-menu #menuActive="nzDropdownMenu">
+                <ul nz-menu>
+                  <li
+                    nz-menu-item
+                    (click)="changeActive(editCacheTypeProject[data.id], 1)"
+                  >
+                    Yes
+                  </li>
+                  <li
+                    nz-menu-item
+                    (click)="changeActive(editCacheTypeProject[data.id], 0)"
+                  >
+                    No
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </ng-template>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </nz-tab>
+  <nz-tab nzTitle="Cài đặt tên dự án" (nzClick)="loadDataNameProject()">
+    <form
+      nz-form
+      [formGroup]="validateFormNameProject"
+      class="ant-advanced-search-form"
+      (ngSubmit)="submitFormNameProject()"
+    >
+      <div nz-row [nzGutter]="24">
+        <div
+          nz-col
+          [nzSpan]="7"
+          *ngFor="let control of controlArrayNameProject"
+          [hidden]="!control.show"
+          [ngSwitch]="control.type"
+        >
+          <nz-form-item *ngSwitchCase="'default'">
+            <nz-form-label [nzFor]="control.name">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control nzDisableAutoTips nzErrorTip="Input is required!">
+              <input
+                nz-input
+                placeholder="{{ control.placeholder }}"
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+              />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngSwitchCase="'select'">
+            <nz-form-label [nzFor]="control.id">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control nzErrorTip="Input is required!">
+              <nz-select
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+                nzPlaceHolder="{{ control.placeholder }}"
+              >
+                <nz-option
+                  *ngFor="let opt of control.valueSelect"
+                  nzValue="{{ opt.value }}"
+                  nzLabel="{{ opt.text }}"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <nz-form-item>
+          <nz-form-control [nzSpan]="8" [nzOffset]="4">
+            <div nz-col [nzSpan]="3" class="search-area">
+              <button nz-button [nzType]="'primary'">Add</button>
+            </div>
+          </nz-form-control>
+        </nz-form-item>
+      </div>
+    </form>
+    <div class="search-result-list">
+      <nz-table
+        #editNameProjectRowTable
+        nzBordered
+        [nzData]="listOfDataNameProject"
+        [nzSize]="'middle'"
+        [nzPageSize]="18"
+        nzTableLayout="fixed"
+        [nzScroll]="{ y: '450px' }"
+        [nzLoading]="loadingData"
+      >
+        <thead>
+          <tr>
+            <th [nzAlign]="'center'" nzWidth="10%">Trạng thái</th>
+            <th [nzAlign]="'center'" nzWidth="25%" nzCustomFilter>
+              Tên dự án
+              <nz-filter-trigger
+                [(nzVisible)]="visibleSearchNameProject"
+                [nzActive]="searchNameProjectValue.length > 0"
+                [nzDropdownMenu]="menuSearchNameProject"
+              >
+                <span nz-icon nzType="search"></span>
+              </nz-filter-trigger>
+            </th>
+            <th [nzAlign]="'center'" nzWidth="25%">Loại dự án</th>
+            <th [nzAlign]="'center'" nzWidth="25%">Ghi chú</th>
+            <th [nzAlign]="'center'">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let data of editNameProjectRowTable.data">
+            <ng-container
+              *ngIf="
+                !editCacheNameProject[data.id].edit;
+                else editNameProjectTemplate
+              "
+            >
+              <td [nzAlign]="'center'">
+                {{ data.active === 1 ? "Yes" : "No" }}
+              </td>
+              <td [nzAlign]="'center'">{{ data.name_project }}</td>
+              <td [nzAlign]="'center'">
+                {{ getValueById(this.filterTypeProject, data.id_type_project) }}
+              </td>
+              <td [nzAlign]="'center'">{{ data.note }}</td>
+              <td [nzAlign]="'center'">
+                <a (click)="startEditNameProject(data.id)">Chỉnh sửa</a>
+              </td>
+            </ng-container>
+            <ng-template #editNameProjectTemplate>
+              <td [nzAlign]="'center'">
+                <button nz-button nz-dropdown [nzDropdownMenu]="menuActive">
+                  {{
+                    editCacheNameProject[data.id].data.active === 1
+                      ? "Yes"
+                      : "No"
+                  }}
+                  <span nz-icon nzType="down"></span>
+                </button>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  nz-input
+                  [(ngModel)]="editCacheNameProject[data.id].data.name_project"
+                />
+              </td>
+              <td>
+                <nz-select
+                  ngModel="{{ editCacheNameProject[data.id].data.id_type_project }}"
+                  (ngModelChange)="changeTypeProject(data.id, $event)"
+                >
+                  <nz-option
+                    *ngFor="let opt of this.filterTypeProject"
+                    nzValue="{{ opt.value }}"
+                    nzLabel="{{ opt.text }}"
+                  ></nz-option>
+                </nz-select>
+              </td>
+              <td>
+                <input
+                  type="text"
+                  nz-input
+                  [(ngModel)]="editCacheNameProject[data.id].data.note"
+                />
+              </td>
+              <td [nzAlign]="'center'">
+                <a (click)="saveEditNameProject(data.id)" class="save">Lưu</a>
+                <a
+                  nz-popconfirm
+                  nzPopconfirmTitle="Bạn có chắc chắn muốn huỷ không?"
+                  (nzOnConfirm)="cancelEditNameProject(data.id)"
+                  >Huỷ</a
+                >
+              </td>
+              <nz-dropdown-menu #menuActive="nzDropdownMenu">
+                <ul nz-menu>
+                  <li
+                    nz-menu-item
+                    (click)="changeActive(editCacheNameProject[data.id], 1)"
+                  >
+                    Yes
+                  </li>
+                  <li
+                    nz-menu-item
+                    (click)="changeActive(editCacheNameProject[data.id], 0)"
+                  >
+                    No
+                  </li>
+                </ul>
+              </nz-dropdown-menu>
+            </ng-template>
+          </tr>
+        </tbody>
+      </nz-table>
+    </div>
+  </nz-tab>
+</nz-tabset>
+<nz-dropdown-menu #menuSearchTypeProject="nzDropdownMenu">
+  <div class="ant-table-filter-dropdown">
+    <div class="search-box">
+      <input
+        type="text"
+        nz-input
+        placeholder="Tìm loại dự án"
+        [(ngModel)]="searchTypeProjectValue"
+      />
+      <button
+        nz-button
+        nzSize="small"
+        nzType="primary"
+        (click)="searchTypeProject()"
+        class="search-button"
+      >
+        Tìm
+      </button>
+      <button nz-button nzSize="small" (click)="resetTypeProject()">
+        Reset
+      </button>
+    </div>
+  </div>
+</nz-dropdown-menu>
+
+<nz-dropdown-menu #menuSearchNameProject="nzDropdownMenu">
+  <div class="ant-table-filter-dropdown">
+    <div class="search-box">
+      <input
+        type="text"
+        nz-input
+        placeholder="Tìm loại dự án"
+        [(ngModel)]="searchNameProjectValue"
+      />
+      <button
+        nz-button
+        nzSize="small"
+        nzType="primary"
+        (click)="searchNameProject()"
+        class="search-button"
+      >
+        Tìm
+      </button>
+      <button nz-button nzSize="small" (click)="resetNameProject()">
+        Reset
+      </button>
+    </div>
+  </div>
+</nz-dropdown-menu>

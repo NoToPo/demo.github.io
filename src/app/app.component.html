@@ -1,0 +1,323 @@
+<nz-layout class="app-layout">
+  <nz-sider
+    class="menu-sidebar"
+    nzCollapsible
+    nzWidth="256px"
+    [(nzCollapsed)]="isCollapsed"
+    [nzTrigger]="null"
+  >
+    <div class="sidebar-logo">
+      <a href="/">
+        <img src="https://ng.ant.design/assets/img/logo.svg" alt="logo" />
+        <h1>Real Estate</h1>
+      </a>
+    </div>
+    <ul
+      nz-menu
+      nzTheme="dark"
+      nzMode="inline"
+      [nzInlineCollapsed]="isCollapsed"
+    >
+      <li nz-submenu [nzOpen]="!isCollapsed" nzTitle="Trang chủ" nzIcon="home">
+        <ul>
+          <li nz-menu-item nzMatchRouter>
+            <a href="/table">Quản lý khách hàng</a>
+          </li>
+        </ul>
+      </li>
+      <li
+        *ngIf="
+          this.authService.isLoggedIn() &&
+          (this.authService.getUserRole() == 'AdminRole' ||
+            this.authService.getUserRole() == 'ModRole')
+        "
+        nz-submenu
+        [nzOpen]="!isCollapsed"
+        nzTitle="Bảng điều khiển"
+        nzIcon="dashboard"
+      >
+        <ul
+          *ngIf="
+            this.authService.isLoggedIn() &&
+            (this.authService.getUserRole() == 'AdminRole' ||
+              this.authService.getUserRole() == 'ModRole')
+          "
+        >
+          <li nz-menu-item nzMatchRouter>
+            <a href="/data-properties-setting">Cài đặt dữ liệu</a>
+          </li>
+        </ul>
+        <ul
+          *ngIf="
+            this.authService.isLoggedIn() &&
+            this.authService.getUserRole() == 'AdminRole'
+          "
+        >
+          <li nz-menu-item nzMatchRouter>
+            <a href="/project-setting">Cài đặt dự án</a>
+          </li>
+        </ul>
+      </li>
+      <li nz-submenu [nzOpen]="!isCollapsed" nzTitle="Đăng nhập" nzIcon="form">
+        <ul>
+          <li
+            *ngIf="
+              this.authService.isLoggedIn() &&
+              this.authService.getUserRole() == 'AdminRole'
+            "
+            nz-menu-item
+            nzMatchRouter
+            (click)="signUp()"
+          >
+            <a>Đăng ký</a>
+          </li>
+          <li
+            *ngIf="
+              this.authService.isLoggedIn() &&
+              (this.authService.getUserRole() == 'UserRole' ||
+                this.authService.getUserRole() == 'ModRole' ||
+                this.authService.getUserRole() == 'AdminRole')
+            "
+            nz-menu-item
+            nzMatchRouter
+            (click)="changePassWord()"
+          >
+            <a>Thay đổi mật khẩu</a>
+          </li>
+          <li
+            *ngIf="!this.authService.isLoggedIn()"
+            nz-menu-item
+            nzMatchRouter
+            (click)="logIn()"
+          >
+            <a>Đăng nhập</a>
+          </li>
+          <li
+            *ngIf="this.authService.isLoggedIn()"
+            nz-menu-item
+            nzMatchRouter
+            (click)="logOut()"
+          >
+            <a>Đăng xuất</a>
+          </li>
+        </ul>
+      </li>
+    </ul>
+  </nz-sider>
+  <nz-layout>
+    <nz-header>
+      <div class="app-header">
+        <span class="header-trigger" (click)="isCollapsed = !isCollapsed">
+          <span
+            class="trigger"
+            nz-icon
+            [nzType]="isCollapsed ? 'menu-unfold' : 'menu-fold'"
+          ></span>
+        </span>
+        <span style="right: 30px; position: absolute; padding-top: 10px; display: inline-flex;">
+          <span style="line-height: normal; padding-top: 5px; padding-right: 10px;">
+            <nz-avatar style="background-color:#87d068;" nzIcon="user"></nz-avatar>
+          </span>
+          <span style="line-height: normal;">
+            <div style="font-weight: bold;" *ngIf="userInfor?.first_name || userInfor?.last_name">{{userInfor.first_name + ' ' + userInfor.last_name}}</div>
+            <div style="font-style: italic;" *ngIf="userInfor?.email">{{userInfor.email}}</div>
+          </span>
+        </span>
+      </div>
+    </nz-header>
+    <nz-content>
+      <div class="inner-content">
+        <router-outlet></router-outlet>
+      </div>
+    </nz-content>
+  </nz-layout>
+</nz-layout>
+
+<!-- Change password modal -->
+<nz-modal
+  [(nzVisible)]="isVisibleChangePassword"
+  (nzOnCancel)="handleCancelChangePassword()"
+  nzFooter=""
+  nzCentered
+>
+  <div *nzModalTitle class="dialog-title">Thay đổi mật khẩu</div>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="validateFormChangePassword">
+      <nz-form-item>
+        <nz-form-label [nzSm]="9" [nzXs]="24" nzRequired nzFor="email"
+          >E-mail</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="E-mail không hợp lệ!"
+        >
+          <input
+            nz-input
+            formControlName="email"
+            id="email"
+            [ngModel]="userInfor.email"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="9" [nzXs]="24" nzFor="oldpassword" nzRequired
+          >Mật khẩu cũ</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập mật khẩu cũ!"
+        >
+          <input
+            nz-input
+            type="password"
+            id="oldpassword"
+            formControlName="oldpassword"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="9" [nzXs]="24" nzFor="newpassword" nzRequired
+          >Mật khẩu mới</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập mật khẩu mới!"
+        >
+          <input
+            nz-input
+            type="password"
+            id="newpassword"
+            formControlName="newpassword"
+            (ngModelChange)="updateConfirmValidatorChangePassword()"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="9" [nzXs]="24" nzFor="renewpassword" nzRequired
+          >Nhập lại mật khẩu mới</nz-form-label
+        >
+        <nz-form-control [nzSm]="14" [nzXs]="24" [nzErrorTip]="errorTpl">
+          <input
+            nz-input
+            type="password"
+            formControlName="renewpassword"
+            id="renewpassword"
+          />
+          <ng-template #errorTpl let-control>
+            <ng-container *ngIf="control.hasError('required')"
+              >Vui lòng xác nhận lại mật khẩu của bạn!</ng-container
+            >
+            <ng-container *ngIf="control.hasError('confirm')">
+              Hai mật khẩu bạn vừa nhập không giống nhau!
+            </ng-container>
+          </ng-template>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <div *nzModalFooter class="dialog-footer">
+    <button nz-button nzType="primary" (click)="submitFormChangePassword()">
+      Lưu
+    </button>
+  </div>
+</nz-modal>
+
+<!-- Signup modal -->
+<nz-modal
+  [(nzVisible)]="isVisibleSignUp"
+  (nzOnCancel)="cancelSignUpForm()"
+  nzFooter=""
+  nzCentered
+>
+  <div *nzModalTitle class="dialog-title">Đăng ký</div>
+  <ng-container *nzModalContent>
+    <form nz-form [formGroup]="validateFormSignUp">
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired nzFor="emailSignUp"
+          >E-mail</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="E-mail không hợp lệ!"
+        >
+          <input nz-input formControlName="emailSignUp" id="emailSignUp" />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="passwordSignUp" nzRequired
+          >Mật khẩu</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập mật khẩu!"
+        >
+          <input
+            nz-input
+            type="password"
+            id="passwordSignUp"
+            formControlName="passwordSignUp"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="firstNameSignUp" nzRequired
+          >Họ</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập họ của bạn!"
+        >
+          <input
+            nz-input
+            type="text"
+            id="firstNameSignUp"
+            formControlName="firstNameSignUp"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzFor="lastNameSignUp" nzRequired
+          >Tên</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập tên của bạn!"
+        >
+          <input
+            nz-input
+            type="text"
+            id="lastNameSignUp"
+            formControlName="lastNameSignUp"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-label [nzSm]="6" [nzXs]="24" nzRequired
+          >Ngày sinh</nz-form-label
+        >
+        <nz-form-control
+          [nzSm]="14"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập ngày sinh của bạn!"
+        >
+          <nz-date-picker
+            [nzFormat]="this.format"
+            formControlName="dateOfBirthSignUp"
+          ></nz-date-picker>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <div *nzModalFooter class="dialog-footer">
+    <button nz-button nzType="primary" (click)="submitSignUpForm()">
+      Đăng ký
+    </button>
+  </div>
+</nz-modal>

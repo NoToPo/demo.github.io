@@ -1,0 +1,551 @@
+<div nz-row class="ant-advanced-search-form">
+  <div nz-col nzFlex="5">
+    <nz-button-group>
+      <button
+        class="value-search"
+        nz-dropdown
+        nzTrigger="click"
+        [nzDropdownMenu]="menu"
+        [nzClickHide]="false"
+        [(nzVisible)]="visibleDropdownSearch"
+      >
+        <nz-tag *ngFor="let tag of searchValue" style="margin: 5px">{{
+          tag.value
+        }}</nz-tag>
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="large"
+        (click)="openDropdownSearch()"
+      >
+        <span nz-icon nzType="search"></span>
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="large"
+        style="margin-left: 5px; border-radius: 0 0 0 0"
+        (click)="reloadData()"
+      >
+        <span nz-icon nzType="reload"></span>
+      </button>
+      <button
+        nz-button
+        nzType="primary"
+        nzSize="large"
+        (click)="showAddNew()"
+        style="margin-left: 5px; border-radius: 0 0 0 0"
+      >
+        Thêm mới
+      </button>
+    </nz-button-group>
+  </div>
+</div>
+<br />
+<div class="search-result-list">
+  <div class="search-result-list">
+    <nz-table
+      #editRowTable
+      nzBordered
+      [nzData]="listOfData"
+      nzTableLayout="fixed"
+      [nzScroll]="{ x: '180vw', y: '600px' }"
+      [nzSize]="'middle'"
+      [nzLoading]="loadingData"
+      [nzTotal]="total"
+      [nzPageSize]="pageSize"
+      [nzPageIndex]="pageIndex"
+      nzShowSizeChanger
+      [nzFrontPagination]="false"
+      (nzQueryParams)="onQueryParamsChange($event)"
+    >
+      <thead>
+        <tr>
+          <th nzWidth="3%" [nzAlign]="'center'" [nzLeft]="true">#</th>
+          <th nzWidth="8%" [nzAlign]="'center'" [nzLeft]="true">
+            Tên khách hàng
+          </th>
+          <th nzWidth="6%" [nzAlign]="'center'">Số điện thoại</th>
+          <th nzWidth="8%" [nzAlign]="'center'">Email</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Địa chỉ</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Mã nhà</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Trạng thái</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Ghi chú</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Hình ảnh</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Cho thuê (VNĐ)</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Cho thuê (USD)</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Bán (VNĐ)</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Bán (USD)</th>
+          <th nzWidth="3%" [nzAlign]="'center'">Giường</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Số phòng tắm</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Renting till</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Nội thất</th>
+          <th nzWidth="3%" [nzAlign]="'center'">Số phòng</th>
+          <th nzWidth="3%" [nzAlign]="'center'">Tòa nhà</th>
+          <th nzWidth="3%" [nzAlign]="'center'">Lầu</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Sổ hồng</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Diện tích</th>
+          <th nzWidth="4%" [nzAlign]="'center'">Dân dụng</th>
+          <th [nzAlign]="'center'" [nzRight]="true">Hành động</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let data of editRowTable.data" (click)="pupolateData(data)">
+          <td [nzAlign]="'center'" [nzLeft]="true">{{ data.Code }}</td>
+          <td [nzAlign]="'center'" [nzLeft]="true">{{ data.Name }}</td>
+          <td [nzAlign]="'center'">{{ data.Phone }}</td>
+          <td [nzAlign]="'center'">{{ data.Email }}</td>
+          <td>{{ data.Address }}</td>
+          <td [nzAlign]="'center'">{{ data.House_Code }}</td>
+          <td [nzAlign]="'center'">
+            <nz-tag [nzColor]="getColorStatusById(this.filterStatus, data.Status)">
+              {{ getValueById(this.filterStatus, data.Status) }}
+            </nz-tag>
+          </td>
+          <td [nzAlign]="'center'">
+            <nz-badge
+              [nzCount]="countNotesByIdData(data.id)"
+              (click)="showModalNote(data)"
+            >
+              <a class="head-example"
+                ><span nz-icon nzType="comment" nzTheme="outline"></span
+              ></a>
+            </nz-badge>
+          </td>
+          <td [nzAlign]="'center'">
+            <nz-badge
+              [nzCount]="countImagesByIdData(data.id)"
+              (click)="showModalImage(data)"
+            >
+              <a class="head-example"
+                ><span nz-icon nzType="file-image" nzTheme="outline"></span
+              ></a>
+            </nz-badge>
+          </td>
+          <td [nzAlign]="'center'">{{ data.VND_Rental }}</td>
+          <td [nzAlign]="'center'">{{ data.USD_Rental }}</td>
+          <td [nzAlign]="'center'">{{ data.VND_Sale }}</td>
+          <td [nzAlign]="'center'">{{ data.USD_Sale }}</td>
+          <td [nzAlign]="'center'">{{ data.Bed }}</td>
+          <td [nzAlign]="'center'">{{ data.Bathroom }}</td>
+          <td [nzAlign]="'center'">{{ data.Renting_till }}</td>
+          <td [nzAlign]="'center'">
+            {{ getValueById(this.filterFurniture, data.Furniture) }}
+          </td>
+          <td [nzAlign]="'center'">{{ data.RoomNumber }}</td>
+          <td [nzAlign]="'center'">{{ data.Tower }}</td>
+          <td [nzAlign]="'center'">{{ data.Floor }}</td>
+          <td [nzAlign]="'center'">{{ data.Pinkbook }}</td>
+          <td [nzAlign]="'center'">{{ data.Sqm }}</td>
+          <td [nzAlign]="'center'">{{ data.civil }}</td>
+          <td [nzAlign]="'center'" [nzRight]="true">
+            <a (click)="showEdit()">Chỉnh sửa</a>
+          </td>
+        </tr>
+      </tbody>
+    </nz-table>
+  </div>
+</div>
+
+<nz-modal
+  [(nzVisible)]="isVisibleModalAdd"
+  nzTitle="Thêm mới"
+  nzCentered
+  (nzOnCancel)="handleCancelModalAdd()"
+  nzWidth="80rem"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent style="min-height: 20rem">
+    <form
+      nz-form
+      [formGroup]="validateForm"
+      class="ant-advanced-search-form"
+      (ngSubmit)="submitForm()"
+    >
+      <div nz-row [nzGutter]="24">
+        <div
+          nz-col
+          [nzSpan]="8"
+          *ngFor="let control of controlArray"
+          [hidden]="!control.show"
+          [ngSwitch]="control.type"
+        >
+          <nz-form-item *ngSwitchCase="'default'">
+            <nz-form-label [nzSm]="8" [nzXs]="24" [nzFor]="control.id">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control
+              [nzSm]="16"
+              [nzXs]="24"
+              nzErrorTip="Input is required!"
+            >
+              <input
+                nz-input
+                placeholder="{{ control.placeholder }}"
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+              />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngSwitchCase="'select'">
+            <nz-form-label [nzSm]="8" [nzXs]="24" [nzFor]="control.id">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control
+              [nzSm]="16"
+              [nzXs]="24"
+              nzErrorTip="Input is required!"
+            >
+              <nz-select
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+                nzPlaceHolder="{{ control.placeholder }}"
+              >
+                <nz-option
+                  *ngFor="let opt of control.valueSelect"
+                  nzValue="{{ opt.value }}"
+                  nzLabel="{{ opt.text }}"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="8">
+          <nz-form-item>
+            <nz-form-label [nzSm]="8" [nzXs]="24" [nzFor]="'upload-image'"
+              >Hình ảnh</nz-form-label
+            >
+            <nz-form-control
+              [nzSm]="16"
+              [nzXs]="24"
+              nzErrorTip="Input is required!"
+            >
+              <nz-upload
+                [(nzFileList)]="fileList"
+                [nzBeforeUpload]="beforeUpload"
+                nzMultiple="'true'"
+              >
+                <button nz-button>
+                  <span nz-icon nzType="upload"></span>
+                  Tải hình ảnh lên
+                </button>
+              </nz-upload>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row style="text-align: right">
+        <div nz-col [nzSpan]="24" class="search-area">
+          <button nz-button [nzType]="'primary'">Gửi</button>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="isVisibleModalEdit"
+  nzTitle="Chỉnh sửa"
+  nzCentered
+  (nzOnCancel)="handleCancelModalEdit()"
+  nzWidth="80rem"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent style="min-height: 20rem">
+    <form
+      nz-form
+      [formGroup]="validateFormEdit"
+      class="ant-advanced-search-form"
+      (ngSubmit)="submitFormEdit()"
+    >
+      <div nz-row [nzGutter]="24">
+        <div
+          nz-col
+          [nzSpan]="8"
+          *ngFor="let control of controlArrayEdit"
+          [hidden]="!control.show"
+          [ngSwitch]="control.type"
+        >
+          <nz-form-item *ngSwitchCase="'default'">
+            <nz-form-label [nzSm]="8" [nzXs]="24" [nzFor]="control.id">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control
+              [nzSm]="16"
+              [nzXs]="24"
+              nzErrorTip="Input is required!"
+            >
+              <input
+                nz-input
+                placeholder="{{ control.placeholder }}"
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+              />
+            </nz-form-control>
+          </nz-form-item>
+          <nz-form-item *ngSwitchCase="'select'">
+            <nz-form-label [nzSm]="8" [nzXs]="24" [nzFor]="control.id">{{
+              control.name
+            }}</nz-form-label>
+            <nz-form-control
+              [nzSm]="16"
+              [nzXs]="24"
+              nzErrorTip="Input is required!"
+            >
+              <nz-select
+                [formControlName]="control.id"
+                [attr.id]="control.id"
+                nzPlaceHolder="{{ control.placeholder }}"
+              >
+                <nz-option
+                  *ngFor="let opt of control.valueSelect"
+                  nzValue="{{ opt.value }}"
+                  nzLabel="{{ opt.text }}"
+                ></nz-option>
+              </nz-select>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+        <div nz-col [nzSpan]="8">
+          <nz-form-item>
+            <nz-form-label [nzSm]="8" [nzXs]="24" [nzFor]="'upload-image'"
+              >Hình ảnh</nz-form-label
+            >
+            <nz-form-control
+              [nzSm]="16"
+              [nzXs]="24"
+              nzErrorTip="Input is required!"
+            >
+              <nz-upload
+                [(nzFileList)]="fileList"
+                [nzBeforeUpload]="beforeUpload"
+                nzMultiple="'true'"
+              >
+                <button nz-button>
+                  <span nz-icon nzType="upload"></span>
+                  Tải hình ảnh lên
+                </button>
+              </nz-upload>
+            </nz-form-control>
+          </nz-form-item>
+        </div>
+      </div>
+      <div nz-row style="text-align: right">
+        <div nz-col [nzSpan]="24" class="search-area">
+          <button nz-button [nzType]="'primary'">Gửi</button>
+        </div>
+      </div>
+    </form>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="isVisibleModalNote"
+  nzTitle="{{ currentRecord?.Code + ' - ' + currentRecord?.Name }}"
+  nzCentered
+  (nzOnCancel)="handleCancelModalNote()"
+  nzWidth="80rem"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent>
+    <div nz-row>
+      <div nz-col nzSpan="8">
+        <nz-descriptions style="padding-right: 20px">
+          <nz-descriptions-item nzSpan="3" nzTitle="Tên người dùng">{{
+            currentRecord.Name
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nzSpan="3" nzTitle="Số điện thoại">{{
+            currentRecord.Phone
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nzSpan="3" nzTitle="Trạng thái">
+            <nz-select
+              ngModel="{{ currentRecord.Status }}"
+              (ngModelChange)="changeStatus($event)"
+            >
+              <nz-option
+                *ngFor="let opt of this.filterStatus"
+                nzValue="{{ opt.value }}"
+                nzLabel="{{ opt.text }}"
+              ></nz-option>
+            </nz-select>
+          </nz-descriptions-item>
+        </nz-descriptions>
+      </div>
+      <div nz-col nzSpan="16">
+        <nz-comment-content>
+          <nz-form-item>
+            <textarea
+              [(ngModel)]="filterAddNotes[currentRecord.id]"
+              style="margin-bottom: 12px"
+              nz-input
+              rows="3"
+            ></textarea>
+            <div nz-col [nzSpan]="24" style="text-align: right">
+              <button
+                nz-button
+                nzType="primary"
+                [nzLoading]="submitting"
+                [disabled]="!filterAddNotes[currentRecord.id]"
+                (click)="handleSubmit(currentRecord.id)"
+              >
+                Gửi
+              </button>
+            </div>
+          </nz-form-item>
+        </nz-comment-content>
+        <div style="max-height: 500px; overflow-y: auto">
+          <div *ngIf="isArray(currentRecord.Note)">
+            <nz-list
+              [nzDataSource]="getNotesByIdData(currentRecord.id)"
+              [nzRenderItem]="item"
+              [nzItemLayout]="'horizontal'"
+            >
+              <ng-template #item let-item>
+                <nz-comment
+                  [nzAuthor]="item.author"
+                  [nzDatetime]="item.datetime"
+                >
+                  <nz-avatar
+                    nz-comment-avatar
+                    nzIcon="user"
+                    [nzSrc]="item.avatar"
+                  ></nz-avatar>
+                  <nz-comment-content>
+                    <p>{{ item.content }}</p>
+                  </nz-comment-content>
+                </nz-comment>
+              </ng-template>
+            </nz-list>
+          </div>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>
+
+<nz-modal
+  [(nzVisible)]="isVisibleModalImage"
+  nzTitle="{{ currentRecord?.Code + ' - ' + currentRecord?.Name }}"
+  nzCentered
+  (nzOnCancel)="handleCancelModalImage()"
+  nzWidth="80rem"
+  [nzFooter]="null"
+>
+  <ng-container *nzModalContent style="min-height: 20rem">
+    <div nz-row>
+      <div nz-col nzSpan="8">
+        <nz-descriptions style="padding-right: 20px">
+          <nz-descriptions-item nz-col nzSpan="3" nzTitle="Tên người dùng">{{
+            currentRecord.Name
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nz-col nzSpan="3" nzTitle="Số điện thoại">{{
+            currentRecord.Phone
+          }}</nz-descriptions-item>
+          <nz-descriptions-item nz-col nzSpan="3" nzTitle="Trạng thái">{{
+            getValueById(this.filterStatus, currentRecord.Status)
+          }}</nz-descriptions-item>
+        </nz-descriptions>
+      </div>
+      <div nz-col nzSpan="16">
+        <div style="max-height: 500px; overflow-y: auto">
+          <nz-image-group>
+            <img
+              class="image-airtable"
+              *ngFor="let path of getImageById(currentRecord.id)"
+              nz-image
+              width="150px"
+              height="150px"
+              nzSrc="{{ path }}"
+              alt=""
+            />
+          </nz-image-group>
+          <nz-upload
+            [nzCustomRequest]="customUploadReq"
+            [nzShowUploadList]="false"
+            [nzMultiple]="true"
+            nzSpan="24"
+          >
+            <button
+              id="button-upload-image"
+              nz-button
+              (click)="setData(currentRecord.id, data)"
+            >
+              <span nz-icon nzType="upload"></span>
+              Tải hình ảnh lên
+            </button>
+          </nz-upload>
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</nz-modal>
+
+<nz-dropdown-menu #menu="nzDropdownMenu">
+  <form
+    nz-form
+    [formGroup]="validateFormSearch"
+    class="ant-advanced-search-form-dropdown"
+    (ngSubmit)="submitFormSearch()"
+  >
+    <div
+      nz-col
+      [nzSpan]="24"
+      *ngFor="let control of controlArraySearch"
+      [hidden]="!control.show"
+      [ngSwitch]="control.type"
+    >
+      <nz-form-item *ngSwitchCase="'default'">
+        <nz-form-label [nzSm]="6" [nzXs]="24" [nzFor]="control.id">{{
+          control.name
+        }}</nz-form-label>
+        <nz-form-control
+          [nzSm]="18"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng nhập {{ control.name }}!"
+        >
+          <input
+            nz-input
+            placeholder="{{ control.placeholder }}"
+            [formControlName]="control.id"
+            [attr.id]="control.id"
+            (change)="makeSearchValue()"
+          />
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item *ngSwitchCase="'select'">
+        <nz-form-label [nzSm]="6" [nzXs]="24" [nzFor]="control.id">{{
+          control.name
+        }}</nz-form-label>
+        <nz-form-control
+          [nzSm]="18"
+          [nzXs]="24"
+          nzErrorTip="Vui lòng chọn {{ control.name }}!"
+        >
+          <nz-select
+            [nzShowSearch]="control.searchable"
+            [formControlName]="control.id"
+            [attr.id]="control.id"
+            nzPlaceHolder="{{ control.placeholder }}"
+            (ngModelChange)="makeSearchValue()"
+          >
+            <nz-option
+              *ngFor="let opt of control.valueSelect"
+              nzValue="{{ opt.value }}"
+              nzLabel="{{ opt.text }}"
+            ></nz-option>
+          </nz-select>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+    <div nz-col [nzSpan]="24" style="text-align: right">
+      <nz-form-item>
+        <nz-form-control>
+          <div class="search-area">
+            <button nz-button [nzType]="'primary'">Tìm kiếm</button>
+          </div>
+        </nz-form-control>
+      </nz-form-item>
+    </div>
+  </form>
+</nz-dropdown-menu>

@@ -1,0 +1,46 @@
+<nz-modal [(nzVisible)]="isVisible" (nzOnCancel)="handleCancel()" nzCentered>
+  <div *nzModalTitle class="dialog-title">Đăng nhập</div>
+  <ng-container *nzModalContent>
+    <form
+      nz-form
+      [formGroup]="validateForm"
+      class="login-form"
+    >
+      <nz-form-item>
+        <nz-form-control nzErrorTip="E-mail không hợp lệ!">
+          <nz-input-group nzPrefixIcon="user">
+            <input
+              type="text"
+              nz-input
+              formControlName="username"
+              placeholder="Username"
+            />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+      <nz-form-item>
+        <nz-form-control nzErrorTip="Vui lòng nhập mật khẩu!">
+          <nz-input-group nzPrefixIcon="lock">
+            <input
+              type="password"
+              nz-input
+              formControlName="password"
+              placeholder="Password"
+            />
+          </nz-input-group>
+        </nz-form-control>
+      </nz-form-item>
+    </form>
+  </ng-container>
+  <div *nzModalFooter class="dialog-footer">
+    <button nz-button nzType="default" (click)="handleCancel()">Hủy</button>
+    <button
+      nz-button
+      nzType="primary"
+      (click)="handleOk()"
+      [nzLoading]="isOkLoading"
+    >
+      Đăng nhập
+    </button>
+  </div>
+</nz-modal>
